@@ -41,12 +41,15 @@ library(jsonlite) # help converting to data frame.
 
 
 ### Example 1 - get the the default data, and get it into a dataframe
-The url <https://www.st.nmfs.noaa.gov/ords/foss/trade_data> is the default for accessing the data.  Click on the link and you'll land on a page with the first 25 rows of data in the data set.  It's not clear to me how this is sorted, but there you go.  You can get this data in R by using httr:GET()
+The url <https://www.st.nmfs.noaa.gov/ords/foss/trade_data> is the default for accessing the data.  Click on the link and you'll land on a page with the first 25 rows of data in the data set.  It's not clear to me how this is sorted, but there you go.  
+<br>
+
+You can get these data in R by using httr:GET()
 
 ```{r}
-ex_1 <- GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data")
+ex_1 <- httr::GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data")
 ex_1
-http_status(ex_1)
+httr::http_status(ex_1) # gives details on the status code returned by the server
 
 ```
 
@@ -57,7 +60,10 @@ ex_1_list <- jsonlite::fromJSON(rawToChar(ex_1$content))
 #str(ex_1_list)
 ```
 
-We now have a list of 6 elements.  It's kind of messy to print out, but use the str() statement that is commented out above to see for yourself what this looks like.  Visual inspection of this list reveals that "items" is the element containing the actual data. We can make this element a data frame to work with.
+We now have a list of 6 elements.  It's kind of messy to print out, but use the str() statement that is commented out above to see for yourself what this looks like.  Visual inspection of this list reveals that "items" is the element containing the actual data. 
+<br>
+
+We can make the "items" element a data frame to work with.
 
 ```{r}
 ex_1_df <- ex_1_list$items
@@ -65,7 +71,10 @@ ex_1_df <- ex_1_list$items
 #head(ex_1_df)
 ```
 
-Note that one of the variables in this data frame, "links", is a weird variable that contains a list in each row.  Let's get rid of that.  Otherwise, it's messy to view. You can see for yourself by running the str() and head() statements that are commented out above.
+Note that one of the variables in this data frame, "links", is a weird variable that contains a list in each row. This makes the data frame very messy to view. You can see this for yourself by running the str() and head() statements that are commented out above. 
+<br>
+
+Let's get rid of the "links" variable in the data frame we've created to improve readability.
 
 ```{r}
 ex_1_df$links <- NULL
@@ -74,25 +83,29 @@ head(ex_1_df)
 ```
 
 ### Example 2 - Specify the amount of data returned: the "limit" parameter
-By default, queries via the API return 25 rows of data.  You can get more by using the query parameter "limit".
+By default, queries via the API return 25 rows of data.  You can get more by using the query parameter "limit".  You can pass stuff to query parameters using the query argument to httr::GET().  The query argument is specified as list.
+<br>
+Let's get more than the default number of observations by specifing that the limit query parameter is 100.
 
 ```{r}
-ex_1 <- GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data",
+ex_2 <- GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data",
   query = list(limit = 100))
-ex_1
+ex_2
 ```
+This gives us 100 rows of data.
 <br>
 **Very imporant note:** the maximum number of rows the server will return is **10,000**.
 <br>
 
 
 ## Filtering the data
-The real usefulness of the API with these data is filtering to get a very specific subset.  Here is an example of the URL you would use to get all data from 2011 onwards: <br>
-https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"year":{"\$gt": 2010}}
+The real usefulness of the API with these data is filtering to get a very specific subset.  Here is an example of the URL you would use to get all data from 2011 onwards: https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"year":{"\$gt": 2010}}
 <br>
-If you copy and paste that link into a brower, it will return that specific data. 
+
+If you copy and paste that link into a brower, it will return those specific data. 
 <br>
-The grammer for this type of filter is pretty specific and wasn't familar to me you.  For example, "\$gt" means "greater than".  For a list of filter operators you can use, checkout "3.2.5.2.1 FilterObject Grammar" at this link: <https://docs.oracle.com/cd/E56351_01/doc.30/e87809/developing-REST-applications.htm#AELIG90103>
+
+The grammar for this type of filter is pretty specific and wasn't familar to me.  For example, "\$gt" means "greater than".  For a list of filter operators you can use, check out "3.2.5.2.1 FilterObject Grammar" at this link: <https://docs.oracle.com/cd/E56351_01/doc.30/e87809/developing-REST-applications.htm#AELIG90103>
 <br>
 
 You can filter on all of the variables in the data set:
@@ -110,22 +123,23 @@ We need to filter on four variables:
 We'll use httr:GET to build this URL: <br>
 https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"name":{"\$like":"%25SALMON%25"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"}
 <br>
-I found the httr:GET() syntax a little tricky.  The query argument consists of a list with *one* element. The element is named "q".  Put all of the filter objects, including the brackets, between single quotes. 
+
+I found the httr:GET() syntax used to build queries with this type of filtering grammar a little tricky.  The query argument consists of a list with *one* element. The element is named "q".  Put all of the filter objects, including the brackets, between single quotes. 
 
 ```{r}
 
-ex_2 <- GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data",
+ex_3 <- GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data",
   query = list(q = '{"name":{"$like":"%SALMON%"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"}'))
 
-ex_2
+ex_3
 
-ex_2_list <- jsonlite::fromJSON(rawToChar(ex_2$content))
+ex_3_list <- jsonlite::fromJSON(rawToChar(ex_3$content))
 
-ex_2_df <- ex_2_list$items
+ex_3_df <- ex_3_list$items
 
-ex_2_df$links <- NULL
+ex_3_df$links <- NULL
 
-head(ex_2_df)
+head(ex_3_df)
 
 ```
 

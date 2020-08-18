@@ -388,15 +388,17 @@ library(jsonlite) # help converting to data frame.</code></pre>
 </div>
 <div id="example-1---get-the-the-default-data-and-get-it-into-a-dataframe" class="section level3">
 <h3>Example 1 - get the the default data, and get it into a dataframe</h3>
-<p>The url <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data</a> is the default for accessing the data. Click on the link and you’ll land on a page with the first 25 rows of data in the data set. It’s not clear to me how this is sorted, but there you go. You can get this data in R by using httr:GET()</p>
-<pre class="r"><code>ex_1 &lt;- GET(&quot;https://www.st.nmfs.noaa.gov/ords/foss/trade_data&quot;)
+<p>The url <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data</a> is the default for accessing the data. Click on the link and you’ll land on a page with the first 25 rows of data in the data set. It’s not clear to me how this is sorted, but there you go.<br />
+<br></p>
+<p>You can get these data in R by using httr:GET()</p>
+<pre class="r"><code>ex_1 &lt;- httr::GET(&quot;https://www.st.nmfs.noaa.gov/ords/foss/trade_data&quot;)
 ex_1</code></pre>
 <pre><code>## Response [https://www.st.nmfs.noaa.gov/ords/foss/trade_data/]
-##   Date: 2020-08-18 16:11
+##   Date: 2020-08-18 17:57
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 11.4 kB</code></pre>
-<pre class="r"><code>http_status(ex_1)</code></pre>
+<pre class="r"><code>httr::http_status(ex_1) # gives details on the status code returned by the server</code></pre>
 <pre><code>## $category
 ## [1] &quot;Success&quot;
 ## 
@@ -408,11 +410,13 @@ ex_1</code></pre>
 <p>The response contains the status code ‘200’, which means it was able to return some data. The raw data isn’t very useful so we use the jsonlite package to covert the JSON formatted response to a list object containing the substance of the response. This substence is contained in a list called “content”.</p>
 <pre class="r"><code>ex_1_list &lt;- jsonlite::fromJSON(rawToChar(ex_1$content)) 
 #str(ex_1_list)</code></pre>
-<p>We now have a list of 6 elements. It’s kind of messy to print out, but use the str() statement that is commented out above to see for yourself what this looks like. Visual inspection of this list reveals that “items” is the element containing the actual data. We can make this element a data frame to work with.</p>
+<p>We now have a list of 6 elements. It’s kind of messy to print out, but use the str() statement that is commented out above to see for yourself what this looks like. Visual inspection of this list reveals that “items” is the element containing the actual data. <br></p>
+<p>We can make the “items” element a data frame to work with.</p>
 <pre class="r"><code>ex_1_df &lt;- ex_1_list$items
 #str(ex_1_df)
 #head(ex_1_df)</code></pre>
-<p>Note that one of the variables in this data frame, “links”, is a weird variable that contains a list in each row. Let’s get rid of that. Otherwise, it’s messy to view. You can see for yourself by running the str() and head() statements that are commented out above.</p>
+<p>Note that one of the variables in this data frame, “links”, is a weird variable that contains a list in each row. This makes the data frame very messy to view. You can see this for yourself by running the str() and head() statements that are commented out above. <br></p>
+<p>Let’s get rid of the “links” variable in the data frame we’ve created to improve readability.</p>
 <pre class="r"><code>ex_1_df$links &lt;- NULL
 str(ex_1_df)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    25 obs. of  16 variables:
@@ -464,21 +468,23 @@ str(ex_1_df)</code></pre>
 </div>
 <div id="example-2---specify-the-amount-of-data-returned-the-limit-parameter" class="section level3">
 <h3>Example 2 - Specify the amount of data returned: the “limit” parameter</h3>
-<p>By default, queries via the API return 25 rows of data. You can get more by using the query parameter “limit”.</p>
-<pre class="r"><code>ex_1 &lt;- GET(&quot;https://www.st.nmfs.noaa.gov/ords/foss/trade_data&quot;,
+<p>By default, queries via the API return 25 rows of data. You can get more by using the query parameter “limit”. You can pass stuff to query parameters using the query argument to httr::GET(). The query argument is specified as list. <br> Let’s get more than the default number of observations by specifing that the limit query parameter is 100.</p>
+<pre class="r"><code>ex_2 &lt;- GET(&quot;https://www.st.nmfs.noaa.gov/ords/foss/trade_data&quot;,
   query = list(limit = 100))
-ex_1</code></pre>
+ex_2</code></pre>
 <pre><code>## Response [https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?limit=100]
-##   Date: 2020-08-18 16:11
+##   Date: 2020-08-18 17:57
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 44 kB</code></pre>
-<p><br> <strong>Very imporant note:</strong> the maximum number of rows the server will return is <strong>10,000</strong>. <br></p>
+<p>This gives us 100 rows of data. <br> <strong>Very imporant note:</strong> the maximum number of rows the server will return is <strong>10,000</strong>. <br></p>
 </div>
 </div>
 <div id="filtering-the-data" class="section level2">
 <h2>Filtering the data</h2>
-<p>The real usefulness of the API with these data is filtering to get a very specific subset. Here is an example of the URL you would use to get all data from 2011 onwards: <br> <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=</a>{“year”:{“$gt”: 2010}} <br> If you copy and paste that link into a brower, it will return that specific data. <br> The grammer for this type of filter is pretty specific and wasn’t familar to me you. For example, “$gt” means “greater than”. For a list of filter operators you can use, checkout “3.2.5.2.1 FilterObject Grammar” at this link: <a href="https://docs.oracle.com/cd/E56351_01/doc.30/e87809/developing-REST-applications.htm#AELIG90103" class="uri">https://docs.oracle.com/cd/E56351_01/doc.30/e87809/developing-REST-applications.htm#AELIG90103</a> <br></p>
+<p>The real usefulness of the API with these data is filtering to get a very specific subset. Here is an example of the URL you would use to get all data from 2011 onwards: <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=</a>{“year”:{“$gt”: 2010}} <br></p>
+<p>If you copy and paste that link into a brower, it will return those specific data. <br></p>
+<p>The grammar for this type of filter is pretty specific and wasn’t familar to me. For example, “$gt” means “greater than”. For a list of filter operators you can use, check out “3.2.5.2.1 FilterObject Grammar” at this link: <a href="https://docs.oracle.com/cd/E56351_01/doc.30/e87809/developing-REST-applications.htm#AELIG90103" class="uri">https://docs.oracle.com/cd/E56351_01/doc.30/e87809/developing-REST-applications.htm#AELIG90103</a> <br></p>
 <p>You can filter on all of the variables in the data set:</p>
 <pre class="r"><code>names(ex_1_df)</code></pre>
 <pre><code>##  [1] &quot;year&quot;             &quot;month&quot;            &quot;hts_number&quot;       &quot;name&quot;            
@@ -494,23 +500,24 @@ ex_1</code></pre>
 <li>“district_name” is equal to “SEATTLE, WA”</li>
 <li>“year” is equal to 2016</li>
 </ul>
-<p>We’ll use httr:GET to build this URL: <br> <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=</a>{“name”:{“$like”:“%25SALMON%25”},“source”:“EXP”,“district_name”:“SEATTLE, WA”,“year”:“2016”} <br> I found the httr:GET() syntax a little tricky. The query argument consists of a list with <em>one</em> element. The element is named “q”. Put all of the filter objects, including the brackets, between single quotes.</p>
-<pre class="r"><code>ex_2 &lt;- GET(&quot;https://www.st.nmfs.noaa.gov/ords/foss/trade_data&quot;,
+<p>We’ll use httr:GET to build this URL: <br> <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=</a>{“name”:{“$like”:“%25SALMON%25”},“source”:“EXP”,“district_name”:“SEATTLE, WA”,“year”:“2016”} <br></p>
+<p>I found the httr:GET() syntax used to build queries with this type of filtering grammar a little tricky. The query argument consists of a list with <em>one</em> element. The element is named “q”. Put all of the filter objects, including the brackets, between single quotes.</p>
+<pre class="r"><code>ex_3 &lt;- GET(&quot;https://www.st.nmfs.noaa.gov/ords/foss/trade_data&quot;,
   query = list(q = &#39;{&quot;name&quot;:{&quot;$like&quot;:&quot;%SALMON%&quot;},&quot;source&quot;:&quot;EXP&quot;,&quot;district_name&quot;:&quot;SEATTLE, WA&quot;,&quot;year&quot;:&quot;2016&quot;}&#39;))
 
-ex_2</code></pre>
+ex_3</code></pre>
 <pre><code>## Response [https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=%7B%22name%22:%7B%22%24like%22:%22%25SALMON%25%22%7D%2C%22source%22:%22EXP%22%2C%22district_name%22:%22SEATTLE%2C+WA%22%2C%22year%22:%222016%22%7D]
-##   Date: 2020-08-18 16:11
+##   Date: 2020-08-18 17:57
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 12.1 kB</code></pre>
-<pre class="r"><code>ex_2_list &lt;- jsonlite::fromJSON(rawToChar(ex_2$content))
+<pre class="r"><code>ex_3_list &lt;- jsonlite::fromJSON(rawToChar(ex_3$content))
 
-ex_2_df &lt;- ex_2_list$items
+ex_3_df &lt;- ex_3_list$items
 
-ex_2_df$links &lt;- NULL
+ex_3_df$links &lt;- NULL
 
-head(ex_2_df)</code></pre>
+head(ex_3_df)</code></pre>
 <pre><code>##   year month hts_number                              name cntry_code fao
 ## 1 2016    02 0304810000 SALMON PACIFIC NSPF FILLET FROZEN       1220 124
 ## 2 2016    01 0305410000                     SALMON SMOKED       1220 124
