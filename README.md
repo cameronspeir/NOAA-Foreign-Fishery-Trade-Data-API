@@ -10,6 +10,6 @@ I hope this helps people access and use the data.  Feel free to contact me or cr
 
 I want to thank Sofia Reardon for explaining the basics of the query syntax to me.  
 
-As of this writing (8/18/2020), I have only included examples using R; specifically, using the httr and jsonlite packages.  Eventually, I would also like to figure out how to access the data set using Stata.  If you have ideas on how to do this, please share with me and your colleagues!
+This repo now includes examples using both R and Stata.  The R examples use the httr and jsonlite packages. The Stata examples are written by Min-Yang Lee at the Northwest Fisheries Science Center.  These .do files are in the "Stata" subfolder and use the insheetjson and libjson packages, which you will need to install from the Boston College Statistical Software Components (SSC) archive. If you have ideas on how to better interact with the fishery trade data, please share with me and your colleagues!
 
 Cameron Speir
