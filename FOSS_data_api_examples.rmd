@@ -1,6 +1,5 @@
 ---
-title: Very Basic Examples of How to Interact with the NOAA Foreign Trade Data Using
-  an API
+title: Using R to Access the Fishery Foreign Trade Data API
 author: "Cameron Speir"
 date: "8/18/2020"
 output: html_document
@@ -16,7 +15,7 @@ NOAA Fisheries' Office of Science and Technology serves data on seafood imports 
 <br>
 <https://www.fisheries.noaa.gov/national/sustainable-fisheries/foreign-fishery-trade-data>
 <br>
-The web interface for quering the data is here:
+The web interface for querying the data is here:
 <br>
 <https://www.st.nmfs.noaa.gov/apex/f?p=213:31>
 <br>

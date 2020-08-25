@@ -1,0 +1,105 @@
+---
+title: 'Using Stata to Access the Fishery Foreign Trade API: Part 2, Filtering'
+author: "Cameron Speir"
+date: "8/25/2020"
+output: html_document
+---
+
+## Do Part 1 First
+The first vignette on using Stata to access the Fishery Foreign Trade API covered the basics, including a refresher on macros, simple data retrieval, and specifying the limit parameter.  In this vignette, we will look at constructing a url to filter the data.  This is much more difficult because Stata can sometimes misinterpret special characters that we need to include in the url.  We will take a look at how the filtering syntax works and introduce Unicode text characters a way to make sure we are builing the right urls.
+
+
+## Filtering the data
+The real usefulness of the API with these data is filtering to get a very specific subset.  Here is an example of the URL you would use to filter on year, e.g., to get all data from 2011 onwards: https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"year":{"\$gt": 2010}}
+<br>
+
+If you copy and paste that link into a brower, it will return those specific data. 
+<br>
+
+The grammar for this type of filter is pretty specific and wasn't familar to me.  For example, "\$gt" means "greater than".  For a list of filter operators you can use, check out "3.2.5.2.1 FilterObject Grammar" at this link: <https://docs.oracle.com/cd/E56351_01/doc.30/e87809/developing-REST-applications.htm#AELIG90103>
+<br>
+
+## Problem: Getting Stata to pass url's containing special characters
+Certain text characters have very specific meanings in the Stata programming language.  Dollar signs have something to do with macros, for example, which is a problem because the filtering grammer used by the API contains a lot of dollar signs.  Also, Stata is very particular about quotation marks are used.  This is also a problem for us becuase query parameters that filter on variables are replete with quotation marks.  All kinds of thing can go wrong when trying to pass url's like this using Stata.
+<br>
+
+## Solution: Unicode text
+Unicode is a standard for encoding characters.  An encoding system is a way of representing a character as a byte or series of bytes.  Examples of encoding systems are ASCII and UTF-8.  UTF-8 is a particular flavor of unicode (ASCII is not a Unicode system).  Unicode is great because it has ways of representing an enormous number of characters in just about any language.  Think of all those French accents.  There is a specific unicode character for each letter-accent combination.
+<br>
+
+In our context, Unicode representations of specific characters are useful because some special characters in Stata (notably, quotation marks and dollar signs) can be misinterpreted by Stata when we use them in a url we want to send to the server as an API request.  
+<br>
+
+Substituting unicode characters into the url we send can solve these problems.  The server reads the the unicode characters that are stuck into the url and is perfectly OK with that.  And we we never have to show Stata any potentially confusing things like dollar signs. For each text character you want to replace with Unicode, swap it out with "%XX" where "XX" is the two-character UTF-8 code.
+
+## List of Unicode Characters
+Wikipedia has a pretty good list of Unicode characters.
+<https://en.wikipedia.org/wiki/List_of_Unicode_characters>
+Use the last two characters in the UTF-8 code listed in the tables to replace a text character.  For example, to replace an exclamation point, "!", use "%21" in the url.  Note that the UTF-8 code listed in the tables is "U+0021".
+<br>
+
+Some incredibly useful codes for working with Stata special characters include:
+
+* %20   empty space
+* %22 " quotation mark
+* %24 \$ dollar sign
+* %25 % percent sign
+* %26 & ampersand
+
+<br>
+
+# Example 1: Simple filter on the "year" variable
+Let's build a query to filter on year, returning observations from 2011-
+<https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"year":{"\$gt": 2010}}>
+<br>
+Again, the quotation marks and the dollar sign are problematic.
+<br>
+C
+
+
+
+
+
+
+
+You can filter on all of the variables in the data set:
+```{r}
+names(ex_1_df)
+```
+### Example 3 - Salmon exports from Seattle in 2016
+We need to filter on four variables:
+
+* "name" contains "SALMON" (case sensitive) 
+* "source" is equal to "EXP"
+* "district_name" is equal to "SEATTLE, WA"
+* "year" is equal to 2016
+
+We'll use httr:GET to build this URL: <br>
+https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"name":{"\$like":"%25SALMON%25"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"}
+<br>
+
+I found the httr:GET() syntax used to build queries with this type of filtering grammar a little tricky.  The query argument consists of a list with *one* element. The element is named "q".  Put all of the filter objects, including the brackets, between single quotes. 
+
+```{r}
+
+ex_3 <- GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data",
+  query = list(q = '{"name":{"$like":"%SALMON%"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"}'))
+
+ex_3
+
+ex_3_list <- jsonlite::fromJSON(rawToChar(ex_3$content))
+
+ex_3_df <- ex_3_list$items
+
+ex_3_df$links <- NULL
+
+head(ex_3_df)
+
+```
+
+**Important Note**: In the URL above, notice the '"\$like":"%25SALMON%25"' filter.  In the filtering syntax that is being used, the notation for finding a string is to use '%' around it. Since '%' is a reserved character in a URL, you have to replace '%' with '%25' when cutting and pasting into a browswer.  However, you do NOT need to do this when using httr:GET() to send your request.  The '%' is sufficient, no '%25%' is needed.
+
+
+
+
+

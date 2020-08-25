@@ -1,0 +1,127 @@
+---
+title: "Using Stata to Access the Fishery Foreign Trade Data API: Part 1, the Easy Stuff"
+author: "Cameron Speir"
+date: "8/25/2020"
+output: html_document
+---
+
+## NOAA's Foreign Fishery Trade Data
+NOAA Fisheries' Office of Science and Technology serves data on seafood imports and exports by product (species and/or product form), country of origin or destination, and U.S. Customs District.  More information on these data can be found at this link:
+<br>
+<https://www.fisheries.noaa.gov/national/sustainable-fisheries/foreign-fishery-trade-data>
+<br>
+The web interface for quering the data is here:
+<br>
+<https://www.st.nmfs.noaa.gov/apex/f?p=213:31>
+<br>
+
+## General info about APIs
+This is not a tutorial about APIs in general.  For more information on APIs go here:<br>
+<www.google.com> 
+
+<br>
+
+## Stata macros
+If you are not comfortable working with macros in Stata, you might want to pause and make yourself comfortable with them.  What follows is essentially an exercise in constructing macros and passing them to the right function in the right way.  Macros aren't hard to understand or use, but if you're not familiar with them they can seem weird and things won't make a whole lof of sense.
+<br>
+
+According to the Stata manual, a macro is "a string of characters, called the *macroname*, that stands for another string of characters,called the macro *contents*.  It's kind of like a variable or object that contains a string.  One website calls them "a box you put text in." 
+<br>
+
+A good place to start learning about macros is the Stata manual, with a quick overview here, <https://www.stata.com/manuals/u18.pdf#u18.3Macros>, and a more advanced treatment here, <https://www.stata.com/manuals/pmacro.pdf>.  A quick summary can also be found at: <https://www.ssc.wisc.edu/sscc/pubs/stata_prog1.htm>.
+<br>
+
+Note that the distinction between global and local macros is not important for what we are doing here.  We will use local macros.
+<br>
+
+## How to Access the trade data API using Stata
+The web interface can be clunky to deal with, if you want to retrieve a relatively large amount of data to analyze.  It is much easier to query the data using an API.   Here are some notes and basic examples on how to do this using Stata.  The gist of this is, in order to return a specific set of data we need to construct a very specific URL that contains the details of the data we want.  The server then returns the requested data in JSON format.
+<br>
+
+### Stata Packages
+You will need two user-contributed packages from SSC: **insheetjson** and **libjson**.  insheetjson is the workhorse here.  I think libjson is just a dependency.  
+
+ssc install insheetjson, replace
+ssc install libjson, replace
+
+
+### Setting up an empty Stata data set
+Before we send the query and parse the results with insheetjson, we need to set up an empty data set with all of the variables we will import.  You need to know the structure of the data here, so take a look at the web interface to see the available variables (<https://www.st.nmfs.noaa.gov/apex/f?p=213:31>).  There are 16 variables in the fishery trade data, we will retrieve all of them.  So, let's create an empty data set consisting of these 16 variables.  First, define a define a local macro, called invars, that contains all 16  variable names.
+
+
+* define a local macro, called invars, with the variable names;
+local invars year month hts_number name cntry_code fao cntry_name district_code 
+			 district_name edible_code kilos val source association rfmo 
+			 nmfs_region_code;
+
+Then, create a an empty variable for each variable name - loop through the varnames in our local macro, invars.
+
+* loop through each varname and create an empty string variable; 			 
+foreach l of local  invars{;
+	gen str30 `l'="";
+};
+
+Each empty variable is specified as a string variable since that's initally how we will import everything.
+
+
+# Example 1 - get the the default data
+The url <https://www.st.nmfs.noaa.gov/ords/foss/trade_data> is the default for accessing the data.  Click on the link and you'll land on a page with the first 25 rows of data in the data set.  It's not clear to me how this is sorted, but there you go.  
+<br>
+
+Use **insheetjson** to send the request and parse the response. 
+
+* send your request to the url and let insheetjson covert from json to a Stata datas set;
+insheetjson `invars'
+	using https://www.st.nmfs.noaa.gov/ords/foss/trade_data,
+	column("year" "month" "hts_number" "name" "cntry_code" "fao" "cntry_name" 
+			"district_code" "district_name" "edible_code" "kilos" "val" 
+			"source" "association" "rfmo" "nmfs_region_code") tableselector("items");
+
+Type "help insheetjson" for all the details of the syntax.  The function requires the arguments varlist (containing the variables in which the imported data are stored - this varlist is contained in our local macro invars), using (containing the url or file containing the json-formatted data - this is the API url), and column (which maps the column headers in the json formatted data to the Stata variables we want to store them in).  We also specify the optional argument tableselector() becuase the query response has multiple levels in its "json object tree".  In this case, we want the table called "items."
+<br>
+Take a look at the results.  Note that the default number of observations retrieved is **25**.
+
+* take a look at the result;
+describe;
+
+Some of the string variables are actually numeric, so we convert them.
+destring year month hts_number cntry_code fao district_code kilos val, replace;
+
+# Example 2 - Specify the amount of data returned: the "limit" parameter
+By default, queries via the API return 25 rows of data.  You can get more by using the query parameter "limit".  
+<br>
+Before you do anything else, remember to create an empty data set and define your invars macro, as we did above.
+Let's get more than the default number of observations by specifing that the limit query parameter is 100. To do this, we need to build following url: <br>
+<https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?limit=100>
+
+To do this, let's build a macro containing the url above.  I'll do this by defining 3 macros:
+1. a macro containing the root url of the trade data api
+2. a macro containing the limit parameter specification, and 
+3. a macro that sticks the root url and limit parameter together to form the request to send
+
+
+
+local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data/ ;
+local limit_param ?limit=100;
+local url_request `url_root'`limit_param';
+
+macro list;
+
+* send your request to the url and let insheetjson covert from json to a Stata datas set;
+insheetjson `invars'
+	using "`url_request'",
+	column("year" "month" "hts_number" "name" "cntry_code" "fao" "cntry_name" 
+			"district_code" "district_name" "edible_code" "kilos" "val" 
+			"source" "association" "rfmo" "nmfs_region_code") tableselector("items");
+
+* take a look at the result;
+describe;
+
+
+This gives us 100 rows of data.
+<br>
+**Very imporant note:** the maximum number of rows the server will return is **10,000**.
+<br>
+
+## Next Up
+We've gone over the basics of using Stata to access the Foreign Fishery Trade Data API. We've covered the basics of data retrieval and specifying the limit parameter.  In the next vignette, we will look at constructing url to filter the data.  This is much more difficult because Stata can sometimes misinterpret special characters that we need to include in the url.  
