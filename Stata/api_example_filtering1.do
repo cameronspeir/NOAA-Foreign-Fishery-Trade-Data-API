@@ -2,13 +2,6 @@
 clear;
 
 
-
-***** How to interact with the NOAA Fishery Trade Data via the API and Stata;
-***** In this example, we'll retrieve the default data by referencing the API root URL:
-***** https://www.st.nmfs.noaa.gov/ords/foss/trade_data  ;;
-
-**** we need to install two packages
-
 *ssc install insheetjson;
 *ssc install libjson;
 

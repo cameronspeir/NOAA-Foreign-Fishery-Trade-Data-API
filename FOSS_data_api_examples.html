@@ -394,7 +394,7 @@ library(jsonlite) # help converting to data frame.</code></pre>
 <pre class="r"><code>ex_1 &lt;- httr::GET(&quot;https://www.st.nmfs.noaa.gov/ords/foss/trade_data&quot;)
 ex_1</code></pre>
 <pre><code>## Response [https://www.st.nmfs.noaa.gov/ords/foss/trade_data/]
-##   Date: 2020-08-25 22:36
+##   Date: 2020-08-26 00:13
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 11.4 kB</code></pre>
@@ -473,7 +473,7 @@ str(ex_1_df)</code></pre>
   query = list(limit = 100))
 ex_2</code></pre>
 <pre><code>## Response [https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?limit=100]
-##   Date: 2020-08-25 22:36
+##   Date: 2020-08-26 00:13
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 44 kB</code></pre>
@@ -507,7 +507,7 @@ ex_2</code></pre>
 
 ex_3</code></pre>
 <pre><code>## Response [https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=%7B%22name%22:%7B%22%24like%22:%22%25SALMON%25%22%7D%2C%22source%22:%22EXP%22%2C%22district_name%22:%22SEATTLE%2C+WA%22%2C%22year%22:%222016%22%7D]
-##   Date: 2020-08-25 22:36
+##   Date: 2020-08-26 00:13
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 12.1 kB</code></pre>
