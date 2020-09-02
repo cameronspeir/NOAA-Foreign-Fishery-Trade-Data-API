@@ -11,9 +11,14 @@ local invars year month hts_number name cntry_code fao cntry_name district_code
 			 district_name edible_code kilos val source association rfmo 
 			 nmfs_region_code;
 
-* loop through each varname and create an empty string variable; 			 
-foreach l of local  invars{;
-	gen str30 `l'="";
+local quote_invars ;
+
+* loop through each varname and create an empty string variable;
+* Add the double quoted name to the quoted local macro. 	;		 
+foreach l of local invars {;
+	gen str60 `l'="";
+	local quote_invars `" `quote_invars' "`l'" "' ;
+
 };
 
 
@@ -32,9 +37,8 @@ macro list;
 * send your request to the url and let insheetjson covert from json to a Stata datas set;
 insheetjson `invars'
 	using "`request_big'",
-	column("year" "month" "hts_number" "name" "cntry_code" "fao" "cntry_name" 
-			"district_code" "district_name" "edible_code" "kilos" "val" 
-			"source" "association" "rfmo" "nmfs_region_code") tableselector("items");
+		column(`quote_invars') tableselector("items");
+
 
 * take a look at the result;
 describe;

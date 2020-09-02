@@ -1,8 +1,11 @@
 ---
-title: "Using Stata to Access the Fishery Foreign Trade Data API: Part 1, the Easy Stuff"
+title: 'Using Stata to Access the Fishery Foreign Trade Data API: Part 1, the Easy
+  Stuff'
 author: "Cameron Speir"
 date: "8/25/2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ## NOAA's Foreign Fishery Trade Data
@@ -48,19 +51,34 @@ ssc install libjson, replace
 ### Setting up an empty Stata data set
 Before we send the query and parse the results with insheetjson, we need to set up an empty data set with all of the variables we will import.  You need to know the structure of the data here, so take a look at the web interface to see the available variables (<https://www.st.nmfs.noaa.gov/apex/f?p=213:31>).  There are 16 variables in the fishery trade data, we will retrieve all of them.  So, let's create an empty data set consisting of these 16 variables.  First, define a define a local macro, called invars, that contains all 16  variable names.
 
-
-* define a local macro, called invars, with the variable names;
+```
+* define a local macro, called invars, with the variable names:
 local invars year month hts_number name cntry_code fao cntry_name district_code 
 			 district_name edible_code kilos val source association rfmo 
 			 nmfs_region_code;
+```
 
-Then, create a an empty variable for each variable name - loop through the varnames in our local macro, invars.
+Also define a local macro that is empty, but will have the elements of invars with double quotes around them ("year" instead of year). Who want to type all that out?
 
-* loop through each varname and create an empty string variable; 			 
+```
+* Define a local macro, called quote_invars, that contains nothing.;
+* We will use this to contain the elements of invars, but wrapped in double quotations;
+
+local quote_invars ;
+```
+
+
+Then, create a an empty variable for each variable name by looping  through the varnames in our local macro, invars.  At the same time, assmble the quote_invars macro.
+```
+* loop through each varname and create an empty string variable;
+* Add the double quoted name to the quoted local macro.; 			 
+
 foreach l of local  invars{;
-	gen str30 `l'="";
-};
+	gen str60 `l'="";
+	local quote_invars `" `quote_invars' "`l'" "' ;
 
+};
+```
 Each empty variable is specified as a string variable since that's initally how we will import everything.
 
 
@@ -70,23 +88,26 @@ The url <https://www.st.nmfs.noaa.gov/ords/foss/trade_data> is the default for a
 
 Use **insheetjson** to send the request and parse the response. 
 
-* send your request to the url and let insheetjson covert from json to a Stata datas set;
+```
+* send your request to the url and let insheetjson covert from json to a Stata dta format ;
 insheetjson `invars'
 	using https://www.st.nmfs.noaa.gov/ords/foss/trade_data,
-	column("year" "month" "hts_number" "name" "cntry_code" "fao" "cntry_name" 
-			"district_code" "district_name" "edible_code" "kilos" "val" 
-			"source" "association" "rfmo" "nmfs_region_code") tableselector("items");
+	column(`quote_invars') tableselector("items");
+```
 
 Type "help insheetjson" for all the details of the syntax.  The function requires the arguments varlist (containing the variables in which the imported data are stored - this varlist is contained in our local macro invars), using (containing the url or file containing the json-formatted data - this is the API url), and column (which maps the column headers in the json formatted data to the Stata variables we want to store them in).  We also specify the optional argument tableselector() becuase the query response has multiple levels in its "json object tree".  In this case, we want the table called "items."
 <br>
 Take a look at the results.  Note that the default number of observations retrieved is **25**.
-
+```
 * take a look at the result;
 describe;
-
+```
 Some of the string variables are actually numeric, so we convert them.
-destring year month hts_number cntry_code fao district_code kilos val, replace;
 
+```
+destring year month hts_number cntry_code fao district_code kilos val, replace;
+compress;
+```
 # Example 2 - Specify the amount of data returned: the "limit" parameter
 By default, queries via the API return 25 rows of data.  You can get more by using the query parameter "limit".  
 <br>
@@ -100,27 +121,28 @@ To do this, let's build a macro containing the url above.  I'll do this by defin
 3. a macro that sticks the root url and limit parameter together to form the request to send
 
 
-
+```
 local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data/ ;
 local limit_param ?limit=100;
 local url_request `url_root'`limit_param';
 
 macro list;
+```
 
+```
 * send your request to the url and let insheetjson covert from json to a Stata datas set;
 insheetjson `invars'
 	using "`url_request'",
-	column("year" "month" "hts_number" "name" "cntry_code" "fao" "cntry_name" 
-			"district_code" "district_name" "edible_code" "kilos" "val" 
-			"source" "association" "rfmo" "nmfs_region_code") tableselector("items");
+		column(`quote_invars') tableselector("items");
+
 
 * take a look at the result;
 describe;
-
+```
 
 This gives us 100 rows of data.
 <br>
-**Very imporant note:** the maximum number of rows the server will return is **10,000**.
+**Very important note:** the maximum number of rows the server will return is **10,000**.
 <br>
 
 ## Next Up
