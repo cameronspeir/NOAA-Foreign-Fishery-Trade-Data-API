@@ -2,7 +2,9 @@
 title: 'Using Stata to Access the Fishery Foreign Trade API: Part 2, Filtering'
 author: "Cameron Speir"
 date: "8/25/2020"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
 ## Do Part 1 First
@@ -58,10 +60,11 @@ The quotation marks and the dollar sign are problematic.
 <br>
 We'll define a macro for the root url and the query paramter, then stick them together into the request url.  When we do this, "%22" is the unicode character for double quotation marks and "%24" represents"$".
 
+```
 * local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data/ ;
 * local query_unicode ?q={%22year%22:{%22%24gt%22:2010}};
 * local request_unicode `url_root'`query_param';
-
+```
 Send your request to the server and let insheetjson covert from json to a Stata datas set.
 insheetjson `invars'
 	using "`request_unicode'",
@@ -93,5 +96,18 @@ We need to build this URL: <br>
 https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"name":{"\$like":"%25SALMON%25"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"}
 <br>
 
+Here's how we will do it:
 
+```
+local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data/;
+local query_SEA_SAMN ?q={%22year%22:2016,%22name%22:{%22%24like%22:%22%25SALMON%25%22},%22source%22:%22EXP%22,%22district_name%22:%22SEATTLE,%20WA%22};
+local request_SEA_SAMN `url_root'`query_SEA_SAMN';
+```
 
+```
+insheetjson `invars'
+	using "`request_SEA_SAMN'",
+	column(`quote_invars') tableselector("items");
+```
+
+Take a look ad the api_example_filtering2.do code.
