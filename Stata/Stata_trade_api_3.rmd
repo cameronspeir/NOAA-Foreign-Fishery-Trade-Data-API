@@ -1,5 +1,5 @@
 ---
-title: 'Using Stata to Access the Fishery Foreign Trade Data API: Part 1, the Easy
+title: 'Using Stata to Access the Fishery Foreign Trade Data API: Part 3, To infinty and Beyond
   Stuff'
 author: "Cameron Speir and Min-Yang Lee"
 date: "9/4/2020"
