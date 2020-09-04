@@ -86,18 +86,18 @@ mac list _url_request;
 /* this is a toy example, so I set this to 25 so we can watch the loop work */
 /*I'm not sure what is optimal to set here, but probably not 25. My guess is to set this much closer to the maximum of 10,000*/
 
-local chunksize 25;
+local chunksize 10;
 local url_limit &limit=`chunksize';
 
-local more="true";
-while "`more'"=="true"{;
+local keep_going="true";
+while "`keep_going'"=="true"{;
 qui count;
 local nobs=r(N);
 local url_offset &offset=`nobs';
 local url_request `url_root'`url_subset'`url_offset'`url_limit';
 mac list _url_request;
 insheetjson `invars' using "`url_request'",	column(`quote_invars') tableselector("items") offset(`nobs') topscalars;
-local more="`r(hasMore)'";
+local keep_going="`r(hasMore)'";
 };
 * take a look at the result;
 describe;
