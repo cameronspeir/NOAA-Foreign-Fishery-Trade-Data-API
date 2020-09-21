@@ -1,0 +1,60 @@
+---
+title: 'Using Stata to Access the Fishery Foreign Trade Data API: Part 3, To infinty and Beyond
+  Stuff'
+author: "Cameron Speir and Min-Yang Lee"
+date: "9/4/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+# Getting more Data
+
+
+The maximum number of rows the server will return is **10,000**, but you might want more  data.  The solution here is a while loop and the topscalars option. For example,  lets say that we want to extract all the Pollock Exports from Seattle, WA in Jan and Feb of 2016. I chose this because there are 36 observations of data, so the query is quick. We could extract all of this data by setting the limit parameter to something large, like 500.  But this is no fun, because you need to know how many observations are there are before actually programming the query. Assuming you've properly set things up as with the previous examples, this stata code will perform the query.
+
+```
+#delimit ;
+local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data;
+
+local url_subset ?q={%22year%22:2016,%22month%22:{%22%24lte%22:2},%22source%22:%22EXP%22,
+  %22district_name%22:%22SEATTLE,%20WA%22,%22name%22:{%22%24like%22:%22%25POLLOCK%25%22}};
+local url_limit &limit=500;
+
+local url_request `url_root'`url_subset'`url_limit';
+insheetjson `invars' using "`url_request'",	column(`quote_invars') tableselector("items");
+```
+
+We will make use of the offsets and the topscalars option. First, define how many rows you want to extract at a time. I've set it to 10, just for demonstration purposes.  You should probably set it to somehing larger, like 1000 or 10000:
+```
+local chunksize 10;
+local url_limit &limit=`chunksize';
+```
+
+
+```
+local keep_going="true";
+while "`keep_going'"=="true"{;
+qui count;
+local nobs=r(N);
+local url_offset &offset=`nobs';
+local url_request `url_root'`url_subset'`url_offset'`url_limit';
+mac list _url_request;
+insheetjson `invars' using "`url_request'",	column(`quote_invars') 
+  tableselector("items") offset(`nobs') topscalars;
+local keep_going="`r(hasMore)'";
+};
+```
+
+This somewhat mysterious code:
+1. Initializes the local macro *keep_going* to "true".  As you might guess, this will tell the loop to keep going when true, and stop when false.
+1. starts the while loop
+1. Counts how many observations we have.
+1. Saves that number to a local *nobs*.
+1. Assembles the offset portion of the url.  By setting the offset, we are telling the API to omit that number of rows in the query.
+1.  Assembles the entire *url_request* local macro.
+1.  Prints that macro, just for funsies.
+1. Reads in the data.  Note we have added the topscalars option
+1.  Set the local macro *keep_going* to whatever is in the r(hasMore) macro.  As you might guess, it is true if there are more rows to the query and false otherwise.
+
+This is probably a hacky way of doing things. It looks like insheetjson has a followurl option, but I haven't figured out how to work it.
+
