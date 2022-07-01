@@ -10,22 +10,22 @@ output:
 
 ## NOAA's Foreign Fishery Trade Data
 NOAA Fisheries' Office of Science and Technology serves data on seafood imports and exports by product (species and/or product form), country of origin or destination, and U.S. Customs District.  More information on these data can be found at this link:
-<br>
+
+
 <https://www.fisheries.noaa.gov/national/sustainable-fisheries/foreign-fishery-trade-data>
-<br>
-The web interface for quering the data is here:
-<br>
-<https://www.st.nmfs.noaa.gov/apex/f?p=213:31>
-<br>
+
+
+The web interface for querying the data is here:
+
+<https://www.fisheries.noaa.gov/foss/f?p=215:2:13360671963847>
+
 
 ## General info about APIs
-This is not a tutorial about APIs in general.  For more information on APIs go here:<br>
-<www.google.com> 
 
-<br>
+This is not a tutorial about APIs in general.  For more information on APIs go to google  
 
 ## Stata macros
-If you are not comfortable working with macros in Stata, you might want to pause and make yourself comfortable with them.  What follows is essentially an exercise in constructing macros and passing them to the right function in the right way.  Macros aren't hard to understand or use, but if you're not familiar with them they can seem weird and things won't make a whole lof of sense.
+If you are not comfortable working with macros in Stata, you might want to pause and make yourself comfortable with them.  What follows is essentially an exercise in constructing macros and passing them to the right function in the right way.  Macros aren't hard to understand or use, but if you're not familiar with them they can seem weird and things won't make a whole lot of sense.
 <br>
 
 According to the Stata manual, a macro is "a string of characters, called the *macroname*, that stands for another string of characters,called the macro *contents*.  It's kind of like a variable or object that contains a string.  One website calls them "a box you put text in." 
@@ -49,7 +49,7 @@ ssc install libjson, replace
 
 
 ### Setting up an empty Stata data set
-Before we send the query and parse the results with insheetjson, we need to set up an empty data set with all of the variables we will import.  You need to know the structure of the data here, so take a look at the web interface to see the available variables (<https://www.st.nmfs.noaa.gov/apex/f?p=213:31>).  There are 16 variables in the fishery trade data, we will retrieve all of them.  So, let's create an empty data set consisting of these 16 variables.  First, define a define a local macro, called invars, that contains all 16  variable names.
+Before we send the query and parse the results with insheetjson, we need to set up an empty data set with all of the variables we will import.  You need to know the structure of the data here, so take a look at the web interface to see the available variables (<https://www.fisheries.noaa.gov/foss/f?p=215:2:13360671963847>).  There are 16 variables in the fishery trade data, we will retrieve all of them.  So, let's create an empty data set consisting of these 16 variables.  First, define a define a local macro, called invars, that contains all 16  variable names.
 
 ```
 * define a local macro, called invars, with the variable names:
@@ -83,7 +83,7 @@ Each empty variable is specified as a string variable since that's initally how 
 
 
 # Example 1 - get the the default data
-The url <https://www.st.nmfs.noaa.gov/ords/foss/trade_data> is the default for accessing the data.  Click on the link and you'll land on a page with the first 25 rows of data in the data set.  It's not clear to me how this is sorted, but there you go.  
+The url <https://apps-st.fisheries.noaa.gov/ods/foss/trade_data> is the default for accessing the data.  Click on the link and you'll land on a page with the first 25 rows of data in the data set.  It's not clear to me how this is sorted, but there you go.  
 <br>
 
 Use **insheetjson** to send the request and parse the response. 
@@ -113,7 +113,7 @@ By default, queries via the API return 25 rows of data.  You can get more by usi
 <br>
 Before you do anything else, remember to create an empty data set and define your invars macro, as we did above.
 Let's get more than the default number of observations by specifing that the limit query parameter is 100. To do this, we need to build following url: <br>
-<https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?limit=100>
+<https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?limit=100>
 
 To do this, let's build a macro containing the url above.  I'll do this by defining 3 macros:
 1. a macro containing the root url of the trade data api
@@ -122,7 +122,7 @@ To do this, let's build a macro containing the url above.  I'll do this by defin
 
 
 ```
-local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data/ ;
+local url_root https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/ ;
 local limit_param ?limit=100;
 local url_request `url_root'`limit_param';
 
