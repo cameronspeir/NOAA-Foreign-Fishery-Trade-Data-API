@@ -37,7 +37,7 @@ di "`l'";
 
 * send your request to the url and let insheetjson covert from json to a Stata datas set;
 insheetjson `invars'
-	using https://www.st.nmfs.noaa.gov/ords/foss/trade_data,
+	using https://apps-st.fisheries.noaa.gov/ods/foss/trade_data,
 	column(`quote_invars') tableselector("items");
 
 * take a look at the result;

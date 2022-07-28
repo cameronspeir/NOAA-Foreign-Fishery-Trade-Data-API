@@ -29,7 +29,7 @@ foreach l of local invars {;
 /****************************************************************************
  Lets say that we want to extract all the Pollock Exports from Seattle, WA in Jan and Feb of 2016. 
  I chose this because there are 36 observations of data. 
- https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={%22year%22:2016,%22month%22:{%22%24lte%22:2},%22source%22:%22EXP%22,%22district_name%22:%22SEATTLE,%20WA%22,%22name%22:{%22%24like%22:%22%25POLLOCK%25%22}}&limit=100 
+ https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q={%22year%22:2016,%22month%22:{%22%24lte%22:2},%22source%22:%22EXP%22,%22district_name%22:%22SEATTLE,%20WA%22,%22name%22:{%22%24like%22:%22%25POLLOCK%25%22}}&limit=100 
 ****************************************************************************/
 
 /****************************************************************************
@@ -37,7 +37,7 @@ We could extract all of this data by setting the limit parameter to something la
 But this is no fun, because you need to know how many observations are there are before actually programming the query
 ****************************************************************************/
 
-local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data;
+local url_root https://apps-st.fisheries.noaa.gov/ods/foss/trade_data;
 local url_subset ?q={%22year%22:2016,%22month%22:{%22%24lte%22:2},%22source%22:%22EXP%22,%22district_name%22:%22SEATTLE,%20WA%22,%22name%22:{%22%24like%22:%22%25POLLOCK%25%22}};
 local url_limit &limit=500;
 
@@ -50,7 +50,7 @@ mac list _url_request;
 /*We want to do submit requests that look like this: This url contains gets the first 10 observations
 */
 
-local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data;
+local url_root https://apps-st.fisheries.noaa.gov/ods/foss/trade_data;
 local url_subset ?q={%22year%22:2016,%22month%22:{%22%24lte%22:2},%22source%22:%22EXP%22,%22district_name%22:%22SEATTLE,%20WA%22,%22name%22:{%22%24like%22:%22%25POLLOCK%25%22}};
 local url_limit &limit=10;
 local url_offset &offset=0;

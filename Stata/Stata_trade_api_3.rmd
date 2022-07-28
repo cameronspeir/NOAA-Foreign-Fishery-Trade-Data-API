@@ -14,7 +14,7 @@ The maximum number of rows the server will return is **10,000**, but you might w
 
 ```
 #delimit ;
-local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data;
+local url_root https://apps-st.fisheries.noaa.gov/ods/foss/trade_data;
 
 local url_subset ?q={%22year%22:2016,%22month%22:{%22%24lte%22:2},%22source%22:%22EXP%22,
   %22district_name%22:%22SEATTLE,%20WA%22,%22name%22:{%22%24like%22:%22%25POLLOCK%25%22}};
