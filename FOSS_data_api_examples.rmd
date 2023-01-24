@@ -46,7 +46,7 @@ The url <https://www.st.nmfs.noaa.gov/ords/foss/trade_data> is the default for a
 You can get these data in R by using httr:GET()
 
 ```{r}
-ex_1 <- httr::GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data")
+ex_1 <- httr::GET("https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/")
 ex_1
 httr::http_status(ex_1) # gives details on the status code returned by the server
 
@@ -127,7 +127,7 @@ I found the httr:GET() syntax used to build queries with this type of filtering 
 
 ```{r}
 
-ex_3 <- GET("https://www.st.nmfs.noaa.gov/ords/foss/trade_data",
+ex_3 <- GET("https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/",
   query = list(q = '{"name":{"$like":"%SALMON%"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"}'))
 
 ex_3
