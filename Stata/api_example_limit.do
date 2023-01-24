@@ -27,8 +27,8 @@ foreach l of local invars {;
 
 ****************************************************************************
 *** specify the number of observations to retrieve - use limit parameter ***;
-*** build this url: https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?limit=100;
-local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data/ ;
+*** build this url: https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?limit=100;
+local url_root https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/ ;
 local limit_param ?limit=100;
 local url_request `url_root'`limit_param';
 

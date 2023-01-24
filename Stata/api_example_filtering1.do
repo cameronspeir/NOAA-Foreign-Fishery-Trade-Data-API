@@ -23,11 +23,11 @@ foreach l of local invars {;
 
 
 ** get all observations after 2010;
-*https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"year":{"$gt": 2010}}
-*https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q={"year":{"$gt":2010}}
+*https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q={"year":{"$gt": 2010}}
+*https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q={"year":{"$gt":2010}}
 
 *The %22 is Unicode for double quotation marks.  %24 is the unicode for $;
-local url_root https://www.st.nmfs.noaa.gov/ords/foss/trade_data/ ;
+local url_root https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/ ;
 local query_unicode ?q={%22year%22:{%22%24gt%22:2010}};
 local limit_param limit=1000;
 local request_big `url_root'`query_unicode'&`limit_param';
