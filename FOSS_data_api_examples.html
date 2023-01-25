@@ -411,7 +411,7 @@ to me how this is sorted, but there you go.<br />
 <pre class="r"><code>ex_1 &lt;- httr::GET(&quot;https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/&quot;)
 ex_1</code></pre>
 <pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/]
-##   Date: 2023-01-25 00:35
+##   Date: 2023-01-25 00:52
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 13.8 kB</code></pre>
@@ -509,7 +509,7 @@ observations by specifing that the limit query parameter is 100.</p>
   query = list(limit = 100))
 ex_2</code></pre>
 <pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?limit=100]
-##   Date: 2023-01-25 00:35
+##   Date: 2023-01-25 00:52
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 55.2 kB</code></pre>
@@ -560,7 +560,7 @@ filter objects, including the brackets, between single quotes.</p>
 
 ex_3</code></pre>
 <pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=%7B%22name%22%3A%7B%22%24like%22%3A%22%25SALMON%25%22%7D%2C%22source%22%3A%22EXP%22%2C%22custom_district_name%22%3A%22SEATTLE%2C%20WA%22%2C%22year%22%3A%222016%22%7D]
-##   Date: 2023-01-25 00:35
+##   Date: 2023-01-25 00:52
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 14.6 kB</code></pre>
@@ -616,14 +616,14 @@ no ‘%25%’ is needed.</p>
 <li>“year” is greater than 2018</li>
 </ul>
 <pre class="r"><code>ex_4 &lt;- GET(&quot;https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/&quot;,
-  query = list(q = &#39;{&quot;name&quot;:{&quot;$like&quot;:&quot;%HAKE%&quot;},&quot;source&quot;:&quot;EXP&quot;,&quot;year&quot;:{&quot;$gt&quot;: 2018}}&#39;))
+  query = list(q = &#39;{&quot;name&quot;:{&quot;$like&quot;:&quot;%HAKE%&quot;},&quot;source&quot;:&quot;EXP&quot;,&quot;year&quot;:{&quot;$gt&quot;: 2018}}&#39;, limit=10000))
 
 ex_4</code></pre>
-<pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=%7B%22name%22%3A%7B%22%24like%22%3A%22%25HAKE%25%22%7D%2C%22source%22%3A%22EXP%22%2C%22year%22%3A%7B%22%24gt%22%3A%202018%7D%7D]
-##   Date: 2023-01-25 00:35
+<pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=%7B%22name%22%3A%7B%22%24like%22%3A%22%25HAKE%25%22%7D%2C%22source%22%3A%22EXP%22%2C%22year%22%3A%7B%22%24gt%22%3A%202018%7D%7D&amp;limit=10000]
+##   Date: 2023-01-25 00:52
 ##   Status: 200
 ##   Content-Type: application/json
-##   Size: 14.3 kB</code></pre>
+##   Size: 427 kB</code></pre>
 <pre class="r"><code>ex_4_list &lt;- jsonlite::fromJSON(rawToChar(ex_4$content))
 
 ex_4_df &lt;- ex_4_list$items

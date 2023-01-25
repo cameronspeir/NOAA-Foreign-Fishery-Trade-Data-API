@@ -159,7 +159,7 @@ We need to filter on four variables:
 ```{r}
 
 ex_4 <- GET("https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/",
-  query = list(q = '{"name":{"$like":"%HAKE%"},"source":"EXP","year":{"$gt": 2018}}'))
+  query = list(q = '{"name":{"$like":"%HAKE%"},"source":"EXP","year":{"$gt": 2018}}', limit=10000))
 
 ex_4
 
