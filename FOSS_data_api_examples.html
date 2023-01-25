@@ -369,7 +369,8 @@ Data API</h1>
 seafood imports and exports by product (species and/or product form),
 country of origin or destination, and U.S. Customs District. More
 information on these data can be found at this link: <br> <a href="https://www.fisheries.noaa.gov/national/sustainable-fisheries/foreign-fishery-trade-data" class="uri">https://www.fisheries.noaa.gov/national/sustainable-fisheries/foreign-fishery-trade-data</a>
-<br> The web interface for querying the data is here: <br> <a href="https://www.st.nmfs.noaa.gov/apex/f?p=213:31" class="uri">https://www.st.nmfs.noaa.gov/apex/f?p=213:31</a> <br></p>
+<br> The web interface for querying the data is here: <br> <a href="https://www.fisheries.noaa.gov/foss/" class="uri">https://www.fisheries.noaa.gov/foss/</a></p>
+<p><br></p>
 </div>
 <div id="general-info-about-apis" class="section level2">
 <h2>General info about APIs</h2>
@@ -386,6 +387,8 @@ do this using R. The gist of this is, in order to return a specific set
 of data we need to construct a very specific URL that contains the
 details of the data we want. The server then returns the requested data
 in JSON format. <br></p>
+<p>There is some general information on the FOSS API, with a link to the
+Oracle REST documentation here: <a href="https://www.fisheries.noaa.gov/foss/f?p=215:35:1042313548962:::::" class="uri">https://www.fisheries.noaa.gov/foss/f?p=215:35:1042313548962:::::</a></p>
 <div id="packages" class="section level3">
 <h3>Packages</h3>
 <p>You will need two packages. <strong>httr</strong> builds queries and
@@ -408,7 +411,7 @@ to me how this is sorted, but there you go.<br />
 <pre class="r"><code>ex_1 &lt;- httr::GET(&quot;https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/&quot;)
 ex_1</code></pre>
 <pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/]
-##   Date: 2023-01-25 00:20
+##   Date: 2023-01-25 00:35
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 13.8 kB</code></pre>
@@ -506,7 +509,7 @@ observations by specifing that the limit query parameter is 100.</p>
   query = list(limit = 100))
 ex_2</code></pre>
 <pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?limit=100]
-##   Date: 2023-01-25 00:20
+##   Date: 2023-01-25 00:35
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 55.2 kB</code></pre>
@@ -543,10 +546,10 @@ at this link: <a href="https://docs.oracle.com/cd/E56351_01/doc.30/e87809/develo
 <ul>
 <li>“name” contains “SALMON” (case sensitive)</li>
 <li>“source” is equal to “EXP”</li>
-<li>“district_name” is equal to “SEATTLE, WA”</li>
+<li>“custom_district_name” is equal to “SEATTLE, WA”</li>
 <li>“year” is equal to 2016</li>
 </ul>
-<p>We’ll use httr:GET to build this URL: <br> <a href="https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=" class="uri">https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=</a>{“name”:{“$like”:“%25SALMON%25”},“source”:“EXP”,“district_name”:“SEATTLE,
+<p>We’ll use httr:GET to build this URL: <br> <a href="https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=" class="uri">https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=</a>{“name”:{“$like”:“%25SALMON%25”},“source”:“EXP”,“custom_district_name”:“SEATTLE,
 WA”,“year”:“2016”} <br></p>
 <p>I found the httr:GET() syntax used to build queries with this type of
 filtering grammar a little tricky. The query argument consists of a list
@@ -557,7 +560,7 @@ filter objects, including the brackets, between single quotes.</p>
 
 ex_3</code></pre>
 <pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=%7B%22name%22%3A%7B%22%24like%22%3A%22%25SALMON%25%22%7D%2C%22source%22%3A%22EXP%22%2C%22custom_district_name%22%3A%22SEATTLE%2C%20WA%22%2C%22year%22%3A%222016%22%7D]
-##   Date: 2023-01-25 00:20
+##   Date: 2023-01-25 00:35
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 14.6 kB</code></pre>
@@ -603,26 +606,59 @@ used, the notation for finding a string is to use ‘%’ around it. Since
 when cutting and pasting into a browswer. However, you do NOT need to do
 this when using httr:GET() to send your request. The ‘%’ is sufficient,
 no ‘%25%’ is needed.</p>
-<!-- ### Example 4 - Hake Exports for Erin -->
-<!-- We need to filter on four variables: -->
-<!-- * "name" contains "HAKE" (case sensitive)  -->
-<!-- * "source" is equal to "EXP" -->
-<!-- * "district_name" is equal to "SEATTLE, WA" -->
-<!-- * "year" is equal to 2016 -->
-<!-- We'll use httr:GET to build this URL: <br> -->
-<!-- https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q={"name":{"\$like":"%25SALMON%25"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"} -->
-<!-- <br> -->
-<!-- I found the httr:GET() syntax used to build queries with this type of filtering grammar a little tricky.  The query argument consists of a list with *one* element. The element is named "q".  Put all of the filter objects, including the brackets, between single quotes.  -->
-<!-- ```{r} -->
-<!-- ex_3 <- GET("https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/", -->
-<!--   query = list(q = '{"name":{"$like":"%SALMON%"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"}')) -->
-<!-- ex_3 -->
-<!-- ex_3_list <- jsonlite::fromJSON(rawToChar(ex_3$content)) -->
-<!-- ex_3_df <- ex_3_list$items -->
-<!-- ex_3_df$links <- NULL -->
-<!-- head(ex_3_df) -->
-<!-- ``` -->
-<!-- **Important Note**: In the URL above, notice the '"\$like":"%25SALMON%25"' filter.  In the filtering syntax that is being used, the notation for finding a string is to use '%' around it. Since '%' is a reserved character in a URL, you have to replace '%' with '%25' when cutting and pasting into a browswer.  However, you do NOT need to do this when using httr:GET() to send your request.  The '%' is sufficient, no '%25%' is needed. -->
+</div>
+<div id="example-4---hake-exports-for-erin" class="section level3">
+<h3>Example 4 - Hake exports for Erin</h3>
+<p>We need to filter on four variables:</p>
+<ul>
+<li>“name” contains “HAKE” (case sensitive)</li>
+<li>“source” is equal to “EXP”</li>
+<li>“year” is greater than 2018</li>
+</ul>
+<pre class="r"><code>ex_4 &lt;- GET(&quot;https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/&quot;,
+  query = list(q = &#39;{&quot;name&quot;:{&quot;$like&quot;:&quot;%HAKE%&quot;},&quot;source&quot;:&quot;EXP&quot;,&quot;year&quot;:{&quot;$gt&quot;: 2018}}&#39;))
+
+ex_4</code></pre>
+<pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=%7B%22name%22%3A%7B%22%24like%22%3A%22%25HAKE%25%22%7D%2C%22source%22%3A%22EXP%22%2C%22year%22%3A%7B%22%24gt%22%3A%202018%7D%7D]
+##   Date: 2023-01-25 00:35
+##   Status: 200
+##   Content-Type: application/json
+##   Size: 14.3 kB</code></pre>
+<pre class="r"><code>ex_4_list &lt;- jsonlite::fromJSON(rawToChar(ex_4$content))
+
+ex_4_df &lt;- ex_4_list$items
+
+ex_4_df$links &lt;- NULL
+
+head(ex_4_df)</code></pre>
+<pre><code>##   year month hts_number                           name fus_group_code
+## 1 2022    05 0304740000  GROUNDFISH HAKE FILLET FROZEN           0525
+## 2 2022    05 0304740000  GROUNDFISH HAKE FILLET FROZEN           0525
+## 3 2022    05 0302540000          GROUNDFISH HAKE FRESH           0131
+## 4 2022    05 0303660000 GROUNDFISH HAKE,WHITING FROZEN           0131
+## 5 2022    05 0303660000 GROUNDFISH HAKE,WHITING FROZEN           0131
+## 6 2022    05 0303660000 GROUNDFISH HAKE,WHITING FROZEN           0131
+##                       fus_group cntry_code         cntry_name     continent fao
+## 1 F/F, FILLET/STEAK, GROUNDFISH       1220             CANADA NORTH AMERICA 124
+## 2 F/F, FILLET/STEAK, GROUNDFISH       2320            BERMUDA     CARIBBEAN 060
+## 3        F/F, WHOLE, GROUNDFISH       1220             CANADA NORTH AMERICA 124
+## 4        F/F, WHOLE, GROUNDFISH       1220             CANADA NORTH AMERICA 124
+## 5        F/F, WHOLE, GROUNDFISH       2470 DOMINICAN REPUBLIC     CARIBBEAN 214
+## 6        F/F, WHOLE, GROUNDFISH       4510          LITHUANIA        EUROPE 440
+##   custom_district_code custom_district_name edible_code  kilos    val source
+## 1                   30          SEATTLE, WA           E    907   4667    EXP
+## 2                   10         NEW YORK, NY           E   3243  24320    EXP
+## 3                   70   LOW VALUE SHIPMENT           E   1471  11840    EXP
+## 4                   30          SEATTLE, WA           E   2089   3821    EXP
+## 5                   30          SEATTLE, WA           E  23940  45486    EXP
+## 6                   30          SEATTLE, WA           E 379010 663742    EXP
+##                      association rfmo nmfs_region_code
+## 1 APEC, ICCAT, NAFO, NAFTA, OECD NAFO               PA
+## 2                           &lt;NA&gt; &lt;NA&gt;               MA
+## 3 APEC, ICCAT, NAFO, NAFTA, OECD NAFO               IN
+## 4 APEC, ICCAT, NAFO, NAFTA, OECD NAFO               PA
+## 5                          CBERA &lt;NA&gt;               PA
+## 6                             EU &lt;NA&gt;               PA</code></pre>
 </div>
 </div>
 

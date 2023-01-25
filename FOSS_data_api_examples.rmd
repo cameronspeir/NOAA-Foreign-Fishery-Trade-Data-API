@@ -148,6 +148,31 @@ head(ex_3_df)
 
 **Important Note**: In the URL above, notice the '"\$like":"%25SALMON%25"' filter.  In the filtering syntax that is being used, the notation for finding a string is to use '%' around it. Since '%' is a reserved character in a URL, you have to replace '%' with '%25' when cutting and pasting into a browswer.  However, you do NOT need to do this when using httr:GET() to send your request.  The '%' is sufficient, no '%25%' is needed.
 
+### Example 4 - Hake exports for Erin
+We need to filter on four variables:
+
+* "name" contains "HAKE" (case sensitive) 
+* "source" is equal to "EXP"
+* "year" is greater than 2018
+
+
+```{r}
+
+ex_4 <- GET("https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/",
+  query = list(q = '{"name":{"$like":"%HAKE%"},"source":"EXP","year":{"$gt": 2018}}'))
+
+ex_4
+
+ex_4_list <- jsonlite::fromJSON(rawToChar(ex_4$content))
+
+ex_4_df <- ex_4_list$items
+
+ex_4_df$links <- NULL
+
+head(ex_4_df)
+
+```
+
 
 
 
