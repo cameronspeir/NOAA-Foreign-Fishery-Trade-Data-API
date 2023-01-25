@@ -399,16 +399,16 @@ library(jsonlite) # help converting to data frame.</code></pre>
 <div id="example-1---get-the-the-default-data-and-get-it-into-a-dataframe" class="section level3">
 <h3>Example 1 - get the the default data, and get it into a
 dataframe</h3>
-<p>The url <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data</a> is the
-default for accessing the data. Click on the link and you’ll land on a
-page with the first 25 rows of data in the data set. It’s not clear to
-me how this is sorted, but there you go.<br />
+<p>The url <a href="https://apps-st.fisheries.noaa.gov/ods/foss/trade_data" class="uri">https://apps-st.fisheries.noaa.gov/ods/foss/trade_data</a>
+is the default for accessing the data. Click on the link and you’ll land
+on a page with the first 25 rows of data in the data set. It’s not clear
+to me how this is sorted, but there you go.<br />
 <br></p>
 <p>You can get these data in R by using httr:GET()</p>
 <pre class="r"><code>ex_1 &lt;- httr::GET(&quot;https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/&quot;)
 ex_1</code></pre>
 <pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/]
-##   Date: 2023-01-24 23:48
+##   Date: 2023-01-25 00:20
 ##   Status: 200
 ##   Content-Type: application/json
 ##   Size: 13.8 kB</code></pre>
@@ -502,25 +502,14 @@ more by using the query parameter “limit”. You can pass stuff to query
 parameters using the query argument to httr::GET(). The query argument
 is specified as list. <br> Let’s get more than the default number of
 observations by specifing that the limit query parameter is 100.</p>
-<pre class="r"><code>ex_2 &lt;- GET(&quot;https://www.st.nmfs.noaa.gov/ords/foss/trade_data&quot;,
+<pre class="r"><code>ex_2 &lt;- GET(&quot;https://apps-st.fisheries.noaa.gov/ods/foss/trade_data&quot;,
   query = list(limit = 100))
 ex_2</code></pre>
-<pre><code>## Response [https://www.st.nmfs.noaa.gov/data-and-tools/maintenance/ods_notification.html]
-##   Date: 2023-01-24 23:48
+<pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?limit=100]
+##   Date: 2023-01-25 00:20
 ##   Status: 200
-##   Content-Type: text/html; charset=UTF-8
-##   Size: 3.56 kB
-## &lt;!DOCTYPE html&gt;
-## &lt;html&gt;
-## &lt;head&gt;
-##  &lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot;&gt;
-##  &lt;style id=&quot;stndz-style&quot;&gt;&lt;/style&gt;&lt;title&gt;Under Maintenance&lt;/title&gt;
-##  &lt;meta content=&quot;Under Maintenance&quot; property=&quot;og:title&quot;&gt;
-##  &lt;meta content=&quot;Under Maintenance&quot; property=&quot;twitter:title&quot;&gt;&lt;meta content=&quot;wi...
-##  &lt;link href=&quot;style.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot;&gt;
-##  &lt;link rel=&quot;stylesheet&quot; href=&quot;webfonts.css&quot; media=&quot;all&quot;&gt;
-##  &lt;script type=&quot;text/javascript&quot;&gt;!function(o,c){var n=c.documentElement,t=&quot; w-...
-## ...</code></pre>
+##   Content-Type: application/json
+##   Size: 55.2 kB</code></pre>
 <p>This gives us 100 rows of data. <br> <strong>Very imporant
 note:</strong> the maximum number of rows the server will return is
 <strong>10,000</strong>. <br></p>
@@ -530,7 +519,7 @@ note:</strong> the maximum number of rows the server will return is
 <h2>Filtering the data</h2>
 <p>The real usefulness of the API with these data is filtering to get a
 very specific subset. Here is an example of the URL you would use to get
-all data from 2011 onwards: <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=</a>{“year”:{“$gt”:
+all data from 2011 onwards: <a href="https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=" class="uri">https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=</a>{“year”:{“$gt”:
 2010}} <br></p>
 <p>If you copy and paste that link into a brower, it will return those
 specific data. <br></p>
@@ -557,22 +546,21 @@ at this link: <a href="https://docs.oracle.com/cd/E56351_01/doc.30/e87809/develo
 <li>“district_name” is equal to “SEATTLE, WA”</li>
 <li>“year” is equal to 2016</li>
 </ul>
-<p>We’ll use httr:GET to build this URL: <br> <a href="https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=" class="uri">https://www.st.nmfs.noaa.gov/ords/foss/trade_data/?q=</a>{“name”:{“$like”:“%25SALMON%25”},“source”:“EXP”,“district_name”:“SEATTLE,
+<p>We’ll use httr:GET to build this URL: <br> <a href="https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=" class="uri">https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=</a>{“name”:{“$like”:“%25SALMON%25”},“source”:“EXP”,“district_name”:“SEATTLE,
 WA”,“year”:“2016”} <br></p>
 <p>I found the httr:GET() syntax used to build queries with this type of
 filtering grammar a little tricky. The query argument consists of a list
 with <em>one</em> element. The element is named “q”. Put all of the
 filter objects, including the brackets, between single quotes.</p>
 <pre class="r"><code>ex_3 &lt;- GET(&quot;https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/&quot;,
-  query = list(q = &#39;{&quot;name&quot;:{&quot;$like&quot;:&quot;%SALMON%&quot;},&quot;source&quot;:&quot;EXP&quot;,&quot;district_name&quot;:&quot;SEATTLE, WA&quot;,&quot;year&quot;:&quot;2016&quot;}&#39;))
+  query = list(q = &#39;{&quot;name&quot;:{&quot;$like&quot;:&quot;%SALMON%&quot;},&quot;source&quot;:&quot;EXP&quot;,&quot;custom_district_name&quot;:&quot;SEATTLE, WA&quot;,&quot;year&quot;:&quot;2016&quot;}&#39;))
 
 ex_3</code></pre>
-<pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=%7B%22name%22%3A%7B%22%24like%22%3A%22%25SALMON%25%22%7D%2C%22source%22%3A%22EXP%22%2C%22district_name%22%3A%22SEATTLE%2C%20WA%22%2C%22year%22%3A%222016%22%7D]
-##   Date: 2023-01-24 23:48
-##   Status: 403
-##   Content-Type: application/problem+json
-##   Size: 328 B
-## &lt;BINARY BODY&gt;</code></pre>
+<pre><code>## Response [https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q=%7B%22name%22%3A%7B%22%24like%22%3A%22%25SALMON%25%22%7D%2C%22source%22%3A%22EXP%22%2C%22custom_district_name%22%3A%22SEATTLE%2C%20WA%22%2C%22year%22%3A%222016%22%7D]
+##   Date: 2023-01-25 00:20
+##   Status: 200
+##   Content-Type: application/json
+##   Size: 14.6 kB</code></pre>
 <pre class="r"><code>ex_3_list &lt;- jsonlite::fromJSON(rawToChar(ex_3$content))
 
 ex_3_df &lt;- ex_3_list$items
@@ -580,7 +568,34 @@ ex_3_df &lt;- ex_3_list$items
 ex_3_df$links &lt;- NULL
 
 head(ex_3_df)</code></pre>
-<pre><code>## NULL</code></pre>
+<pre><code>##   year month hts_number                             name fus_group_code
+## 1 2016    02 1604114030 SALMON SOCKEYE CANNED NOT IN OIL           1075
+## 2 2016    02 1604114030 SALMON SOCKEYE CANNED NOT IN OIL           1075
+## 3 2016    02 1604114030 SALMON SOCKEYE CANNED NOT IN OIL           1075
+## 4 2016    02 1604114030 SALMON SOCKEYE CANNED NOT IN OIL           1075
+## 5 2016    02 1604114030 SALMON SOCKEYE CANNED NOT IN OIL           1075
+## 6 2016    02 1604114040    SALMON NSPF CANNED NOT IN OIL           1080
+##              fus_group cntry_code     cntry_name     continent fao
+## 1 CANNED, FISH, SALMON       4120 UNITED KINGDOM        EUROPE 826
+## 2 CANNED, FISH, SALMON       4210    NETHERLANDS        EUROPE 528
+## 3 CANNED, FISH, SALMON       5880          JAPAN          ASIA 392
+## 4 CANNED, FISH, SALMON       6021      AUSTRALIA       OCEANIA 036
+## 5 CANNED, FISH, SALMON       7910   SOUTH AFRICA        AFRICA 710
+## 6 CANNED, FISH, SALMON       1220         CANADA NORTH AMERICA 124
+##   custom_district_code custom_district_name edible_code  kilos     val source
+## 1                   30          SEATTLE, WA           E 333984 2302666    EXP
+## 2                   30          SEATTLE, WA           E  73456  391103    EXP
+## 3                   30          SEATTLE, WA           E   2630   13050    EXP
+## 4                   30          SEATTLE, WA           E 165695  931160    EXP
+## 5                   30          SEATTLE, WA           E  16444  157500    EXP
+## 6                   30          SEATTLE, WA           E   6179   18053    EXP
+##                              association                rfmo nmfs_region_code
+## 1                CCAMLR, EU, ICCAT, OECD              CCAMLR               PA
+## 2                               EU, OECD                &lt;NA&gt;               PA
+## 3 APEC, CCAMLR, IATTC, ICCAT, NAFO, OECD CCAMLR, IATTC, NAFO               PA
+## 4                     APEC, CCAMLR, OECD              CCAMLR               PA
+## 5                    CCAMLR, ICCAT, SADC              CCAMLR               PA
+## 6         APEC, ICCAT, NAFO, NAFTA, OECD                NAFO               PA</code></pre>
 <p><strong>Important Note</strong>: In the URL above, notice the
 ‘“$like”:“%25SALMON%25”’ filter. In the filtering syntax that is being
 used, the notation for finding a string is to use ‘%’ around it. Since
@@ -588,6 +603,26 @@ used, the notation for finding a string is to use ‘%’ around it. Since
 when cutting and pasting into a browswer. However, you do NOT need to do
 this when using httr:GET() to send your request. The ‘%’ is sufficient,
 no ‘%25%’ is needed.</p>
+<!-- ### Example 4 - Hake Exports for Erin -->
+<!-- We need to filter on four variables: -->
+<!-- * "name" contains "HAKE" (case sensitive)  -->
+<!-- * "source" is equal to "EXP" -->
+<!-- * "district_name" is equal to "SEATTLE, WA" -->
+<!-- * "year" is equal to 2016 -->
+<!-- We'll use httr:GET to build this URL: <br> -->
+<!-- https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/?q={"name":{"\$like":"%25SALMON%25"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"} -->
+<!-- <br> -->
+<!-- I found the httr:GET() syntax used to build queries with this type of filtering grammar a little tricky.  The query argument consists of a list with *one* element. The element is named "q".  Put all of the filter objects, including the brackets, between single quotes.  -->
+<!-- ```{r} -->
+<!-- ex_3 <- GET("https://apps-st.fisheries.noaa.gov/ods/foss/trade_data/", -->
+<!--   query = list(q = '{"name":{"$like":"%SALMON%"},"source":"EXP","district_name":"SEATTLE, WA","year":"2016"}')) -->
+<!-- ex_3 -->
+<!-- ex_3_list <- jsonlite::fromJSON(rawToChar(ex_3$content)) -->
+<!-- ex_3_df <- ex_3_list$items -->
+<!-- ex_3_df$links <- NULL -->
+<!-- head(ex_3_df) -->
+<!-- ``` -->
+<!-- **Important Note**: In the URL above, notice the '"\$like":"%25SALMON%25"' filter.  In the filtering syntax that is being used, the notation for finding a string is to use '%' around it. Since '%' is a reserved character in a URL, you have to replace '%' with '%25' when cutting and pasting into a browswer.  However, you do NOT need to do this when using httr:GET() to send your request.  The '%' is sufficient, no '%25%' is needed. -->
 </div>
 </div>
 
